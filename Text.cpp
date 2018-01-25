@@ -1,63 +1,68 @@
-/*
-	Title:  Text.cpp
-	Author:  Mark Boshart, modified by April Crockett
-	Date:  11/7/2017
-	About:  A structure version of the C++ string class
-*/
-
 #include "Text.h"
+#include <iomanip>
+#include <iostream>
+#include <cstring>
 
 using namespace std;
 
-Text* createText(const char* text)
-{
-	//dynamically allocate a new Text
-	Text* myText = new Text; 
-	
-	//get the length of the string passed to this function & assign it to member textlength
-	myText->textLength = strlen(text);
+Text::Text(const char* text)
+{	
+	//get the length of the string passed to this function
+	textLength = strlen(text);
 	
 	//dynamically allocate a new character array
-	//the line below wont work because I need textArray to be const but I can't dynamically allocate a const char array 
-	//myText->textArray = new char[(myText->textLength)+1];
-	char* tempTextArray = new char[(myText->textLength)+1];
+	char* tempTextArray = new char[(textLength)+1];
 	
-	/*
-		Now put text inside of tempTextArray
-		I can either use the cstring function called strcpy OR
-		I could have created a for loop and copy one character at a time.
-	*/
-	strcpy(tempTextArray, text); //string -> c-string
+	//Now put text inside of tempTextArray
+	strcpy(tempTextArray, text); 
 	
 	//put the text sent to this function into the newly created array
 	//I can do assignment because it is assigning a pointer (not a cstring)
-	myText->textArray = tempTextArray;	
+	this->textArray = tempTextArray;	
+}
+
+Text::~Text()
+{
+	//release the dynamically allocated character array
+	cout << "\nRELEASING MEMORY FOR THIS Text object:  ";
+	displayText(); 
+	cout << endl;
+	delete [] textArray;
 	
-	return myText;
 }
 
-void destroyText(Text* myText)
+void Text::editText(const char* newTextArray)
 {
-	//create a temporary c-string to make the syntax easier to delete the array
-	const char* tempTextArray = myText->textArray;
-	//delete the character array (c-string), which is inside the structure
-	delete [] tempTextArray;//deletes char array must include []
-	//delete the entire structure
-	delete myText;
+	//first delete the array that textArray is currently pointing to (the old string)
+	delete [] textArray;
+	
+	//get the length of the string passed to this function
+	textLength = strlen(newTextArray);
+	
+	//cout << "\n\nThe length of " << newTextArray << " is " << textLength << endl << endl;
+	
+	//dynamically allocate a new character array
+	char* tempTextArray = new char[(textLength)+1];
+	
+	//Now put the new text passed to this function inside of tempTextArray
+	strcpy(tempTextArray, newTextArray); 
+	
+	//put the text sent to this function into the newly created array
+	//I can do assignment because it is assigning a pointer (not a cstring)
+	this->textArray = tempTextArray;	
 }
 
-void displayText(Text* myText)
+void Text::displayText() const
 {
-	//print out the c-string
-	cout << myText->textArray;//not necessary to dereference pointer
+	cout << textArray;
 }
 
-const char* getText(Text* myText)
+const char* Text::getText() const
 {
-	return myText->textArray;
+	return textArray;
 }
 
-int getLength(Text* myText)
+int Text::getLength() const
 {
-	return myText->textLength;
+	return textLength;
 }

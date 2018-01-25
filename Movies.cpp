@@ -1,108 +1,182 @@
 /*
 	Title:  Movies.cpp
-	Author:  April R Crockett, modified by David Wallace******************************************************
-	Date:  11/7/2017
+	Author:  April R Crockett, modified by David Wallace
+	Date:  1/25/2018
 	Purpose:  Be able to create, manage, print, save & delete a movie library
 */
 #include "Movies.h"
 #include "Movie.h"
 
-
-void removeMovieFromArray(Movies* myMovies, int movieElementToBeRemoved){
-		int i =0; 
-		movieElementToBeRemoved-=1;
-		while(i!=movieElementToBeRemoved){
-			i++;
-		}
-		destroyMovie(myMovies->moviesArray[i]);
-		int j = i+1;
-		for(j;j<myMovies->numMovies-1;j++,i++)	{//overwrites element I with j(i+1) & following elements
-			myMovies->moviesArray[i]= myMovies->moviesArray[j];
-			
-			}
-		//destroyMovie(myMovies->moviesArray[j]);//releases dynamically allocated mem for j 
-		myMovies->moviesArray[j] = NULL; 
-		(myMovies->numMovies)--;
-		cout<<"Your movie was successfully deleted.";
-}
-
-void displayMovieTitles(Movies* myMovie){
-	for(int x=0; x < (myMovie->numMovies); x++)
-	{
-	cout << endl;
-	cout << right << setw(30) << "Movie "<<x+1<<" :  " << left;
-	displayText(myMovie->moviesArray[x]->movieTitle);
-	
-	}
-}
-Movies* createMovies(int max)
+Movies::Movies(int max)
 {
-	//dynamically create a new Movies structure
-	Movies* myMovies = new Movies;
-	myMovies->maxMovies = max;
-	myMovies->numMovies = 0;
+	
+	
+	maxMovies = max;
+	numMovies = 0;
 	
 	//dynamically create the array that will hold the movies
-	myMovies->moviesArray = new Movie*[max];
+	moviesArray = new Movie*[max];
 	
-	return myMovies;
+	
+}
+Movies::~Movies()
+{
+delete moviesArray;	
 }
 
-void resizeMovieArray(Movies* myMovies)
+void Movies::resizeMovieArray()
 {
-	int max = myMovies->maxMovies * 2; //increase size by 2
+	int max = maxMovies * 2; //increase size by 2
 	
 	//make an array that is twice as big as the one I've currently got
 	Movie** newMoviesArray = new Movie*[max];
-	for(int x = 0; x < myMovies->numMovies; x++)
+	for(int x = 0; x < numMovies; x++)
 	{
-		newMoviesArray[x] = myMovies->moviesArray[x];
+		newMoviesArray[x] = moviesArray[x];
 	}
 	
-	myMovies->moviesArray = newMoviesArray;
-	myMovies->maxMovies = max;
-}
-
-bool addMovieToArray(Movies* myMovies, Movie* oneMovie) 
-{
-	bool wasAbleToAddMovie = false;
+	//delete the original array from memory
+	delete [] moviesArray;
 	
-	if(myMovies->numMovies == myMovies->maxMovies)
-		resizeMovieArray(myMovies);	//increase size by 2
-
-	myMovies->moviesArray[myMovies->numMovies] = oneMovie;
-	wasAbleToAddMovie = true;
-	(myMovies->numMovies)++;
-	return wasAbleToAddMovie;
+	moviesArray = newMoviesArray;
+	maxMovies = max;
 }
 
-void destroyMovies(Movies* myMovies)
+void Movies::addMovieToArray() 
 {
-	//delete each movie
-	for(int x=0; x< (myMovies->numMovies); x++)
+	char tempString[100];
+	int length, year, numOscars;
+	double numStars;
+	Text* title;
+	Text* genre;
+	Text* rating;
+	
+	//get movie data from the user
+	cin.ignore();  //remove the \n from the keyboard buffer
+	cout << "\n\nMOVIE TITLE: ";
+	cin.getline(tempString, 100);
+	title = new Text(tempString);
+	cout << "\nMOVIE LENGTH (in minutes): ";
+	cin >> length;
+	cout << "\nMOVIE YEAR: ";
+	cin >> year;
+	cin.ignore();
+	cout << "\nMOVIE GENRE: ";
+	cin.getline(tempString, 100);
+	genre = new Text(tempString);
+	cout << "\nMOVIE RATING: ";
+	cin.getline(tempString, 100);
+	rating = new Text(tempString);
+	cout << "\nNUMBER OF OSCARS WON: ";
+	cin >> numOscars;
+	cout << "\nSTAR RATING (out of 10): ";
+	cin >> numStars;
+	
+	//create the movie
+	Movie* oneMovie = new Movie(title, length, year, genre, rating, numOscars, numStars);
+					
+	//add the movie to the library	
+	if(numMovies == maxMovies)
+		resizeMovieArray();	//increase size by 2
+
+	moviesArray[this->numMovies] = oneMovie;
+
+	numMovies++;
+}
+
+void Movies::removeMovieFromArray()
+{
+	int movieChoice;
+	cout << numMovies << endl << endl;
+	//delete a movie if there is more than one movie in the library.
+	if((numMovies) <= 1)
 	{
-		//delete myMovies->moviesArray[x];
-		destroyMovie(myMovies->moviesArray[x]);
+	   cout << endl << "There must always be at least one movie in your library.  You can\'t";
+	   cout << " remove any movies right now or you will have no movies in your library.\n";
+	}
+	else
+	{
+		cout << "\n\nChoose from the following movies to remove:\n";
+		displayMovieTitles();
+		cout << "\nChoose a movie to remove between 1 & " << numMovies << ":  ";
+		cin >> movieChoice;
+		while(movieChoice < 1 || movieChoice > numMovies)
+		{
+			cout << "\nOops!  You must enter a number between 1 & " << numMovies << ":  ";
+			cin >> movieChoice;
+		}
+		int movieIndexToBeRemoved = movieChoice-1;
+		Text* movieTitle;
+		movieTitle = moviesArray[movieIndexToBeRemoved]->getMovieTitle();
 		
+		
+		
+		
+		int numElementsToMoveBack = (numMovies) - 1;
+		
+		for(int x = movieIndexToBeRemoved; x < numElementsToMoveBack; x++)
+		{
+			moviesArray[x] = moviesArray[x+1]; //move array elements!
+		}
+		
+		//set the last movie to a null pointer
+		moviesArray[numElementsToMoveBack] = NULL;
+		
+		//decrement the current number of movies
+		numMovies--;
+		
+		cout << "\n\nThe movie \"";
+		movieTitle->displayText();
+		cout << "\" has been successfully deleted.\n";	
 	}
-	
-	//delete movies array
-	delete [] myMovies->moviesArray;
-	
-	//delete myMovies
-	delete myMovies;
 }
 
-void displayMovies(Movies* myMovies)
-{		
-	for(int x=0; x < (myMovies->numMovies); x++)
-	{	
-		cout << endl << right << setw(50) << "----------MOVIE " << (x+1) << "----------";
-		printMovieDetails(myMovies->moviesArray[x]); 
+void Movies::editMovieInArray()
+{
+	int movieChoice;
+	
+	cout << "\n\nChoose from the following movies to edit:\n";
+	displayMovieTitles();
+	cout << "\nChoose a movie to remove between 1 & " << numMovies << ":  ";
+	cin >> movieChoice;
+	while(movieChoice < 1 || movieChoice > numMovies)
+	{
+		cout << "\nOops!  You must enter a number between 1 & " << numMovies << ":  ";
+		cin >> movieChoice;
+	}
+	Movie* oneMovie = moviesArray[movieChoice-1];
+	oneMovie->editMovie();
+}
+
+
+
+void Movies::displayMovies()
+{
+	if(numMovies > 0)
+	{
+		for(int x=0; x < numMovies; x++)
+		{
+			cout << endl << right << setw(50) << "----------MOVIE " << (x+1) << "----------";
+			moviesArray[x]->printMovieDetails(); //function is in Movie.cpp
+		}
+	}
+	else	
+		cout << "\nThere are no movies in your library yet.";
+}
+
+void Movies::displayMovieTitles()
+{
+	Text* movieTitle;
+	
+	for(int x=0; x < (numMovies); x++)
+	{
+		cout << "\nMOVIE " << (x+1) <<": ";
+		movieTitle = moviesArray[x]->getMovieTitle();
+		movieTitle->displayText();
 	}
 }
 
-void readMoviesFromFile(char *filename, Movies* myMovies)
+void Movies::readMoviesFromFile(char *filename)
 {
 	int numMoviesReadFromFile = 0;
 	ifstream inFile;
@@ -122,36 +196,33 @@ void readMoviesFromFile(char *filename, Movies* myMovies)
 		inFile.getline(temp, 100);
 		while(!inFile.eof())
 		{	
-			title = createText(temp);//create a text for the movie title
+			title = new Text(temp);//create a text for the movie title
 			inFile >> movieLength;
 			inFile >> movieYear;
 			inFile.ignore(); //get rid of \n in the inFile buffer
 			
 			inFile.getline(temp, 100); //read in genre
-			genre = createText(temp); //create a text for genre
+			genre = new Text(temp); //create a text for genre
 			inFile.getline(temp, 100); //read in rating
-			rating = createText(temp); //create a text for rating
+			rating = new Text(temp); //create a text for rating
 			inFile >> movieOscars;
 			inFile >> movieNumStars;
 			inFile.ignore(); //get rid of \n in the inFile buffer
 			
 			//one movie has been read from the file.  Now create a movie object
-			oneMovie = createMovie(title, movieLength, movieYear, genre, rating, movieOscars, movieNumStars);
+			oneMovie = new Movie(title, movieLength, movieYear, genre, rating, movieOscars, movieNumStars);
 			
 			//now add this movie to the library
-			if(addMovieToArray(myMovies, oneMovie))
-			{
-				cout << endl;
-				displayText(title);
-				cout << " was added to the movie library!\n";
-			}
-			else
-			{
-				cout << endl;
-				cout << "I was unable to add ";
-				displayText(title);
-				cout << " to the movie library.\n";
-			}
+			if(numMovies == maxMovies)
+				resizeMovieArray();	//increase size by 2
+			moviesArray[numMovies] = oneMovie;
+			numMovies++;
+			
+			//confirm addition to the user
+			cout << endl;
+			title->displayText();
+			cout << " was added to the movie library!\n";
+			
 			
 			inFile.getline(temp, 100); //read in the next movie title if there is one
 			
@@ -166,15 +237,15 @@ void readMoviesFromFile(char *filename, Movies* myMovies)
 	}
 }
 
-void saveToFile(char *filename, Movies* myMovies)
+void Movies::saveToFile(char *filename)
 {
 	ofstream outFile;
 	
 	outFile.open(filename);
 	
-	for(int x=0; x < (myMovies->numMovies); x++)
+	for(int x=0; x < (numMovies); x++)
 	{
-		printMovieDetailsToFile(myMovies->moviesArray[x], outFile); 
+		moviesArray[x]->printMovieDetailsToFile( outFile); //function in Movies.cpp
 	}
 	outFile.close();
 	

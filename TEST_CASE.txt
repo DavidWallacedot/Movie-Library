@@ -28,4 +28,3 @@ G
 2
 bammalammajamjam.txt
 7
-y

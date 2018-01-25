@@ -1,60 +1,64 @@
-/*
-	Title:  Text.h
-	Author:  Mark Boshart, modified by April Crockett
-	Date:  11/7/2017
-	About:  A structure version of the C++ string class
-*/
-
 #ifndef TEXT_H
 #define TEXT_H
 
 #include <iostream>
-#include <iomanip>
-#include <cstring>
 using namespace std;
 
-struct Text
+class Text
 {
-	const char* textArray;
-	int textLength;
-};
+	private:
+		const char* textArray;
+		int textLength;
+		
+	public:
+		
+		/*
+			Function Name:  Text (constructor)
+			Parameters:  Send a pointer to a constant character array or a string literal to this function
+			Purpose:  called automatically when Text object is created, dynamically allocates a character array which
+				contains the character array passed to the function.
+		*/
+		Text(const char*);
 
-/*
-	Function Name:  createText()
-	Parameters:  Send a pointer to a constant character array or a string literal to this function
-	Returns:  A pointer to a new Text variable, which contains the c-string & the length of the string
-	Purpose:  To create a new Text variable
-*/
-Text* createText(const char*);
+		/*
+			Function Name:  ~Text (destructor)
+			Purpose: release dynamically allocated memory for the c-string in the Text object 
+		*/
+		~Text();
+		
+		/*
+			Function Name:  displayText()
+			Parameters:  none
+			Returns:  none (void)
+			Purpose:  prints out the string (character array)
+		*/
+		void displayText() const;	
+		
+		/*
+			Function Name:  getText() (accessor function)
+			Parameters:  none
+			Returns:  pointer to a constant character array
+		*/
+		const char* getText() const;
 
-/*
-	Function Name:  destroyText()
-	Parameters:  Send a pointer to a Text variable, which contains a c-string & length of the string
-	Returns:  nothing (void)
-	Purpose:  release dynamically allocated memory that the pointer is pointing to.
-*/
-void destroyText(Text*);
-
-/*
-	Function Name:  displayText()
-	Parameters:  Send a pointer to a Text variable, which contains a c-string & length of the string
-	Returns:  nothing (void)
-	Purpose:  prints out the string (character array)
-*/
-void displayText(Text*);
-
-/*
-	Function Name:  getText()
-	Parameters:  Send a pointer to a Text variable, which contains a c-string & length of the string
-	Returns:  pointer to a constant character array
-*/
-const char* getText(Text*);
-
-/*
-	Function Name:  getLength()
-	Parameters:  Send a pointer to a Text variable, which contains a c-string & length of the string
-	Returns:  the length of the string 
-*/
-int getLength(Text*);
-
+		/*
+			Function Name:  getLength() (accessor function)
+			Parameters:  none
+			Returns:  the length of the string 
+		*/
+		int getLength() const;
+		
+		/*
+			Function Name:  editText() 
+			Parameters:  pointer to a constant character array
+			Returns:  none
+			Purpose:  This function first deletes the DMA string that it was pointing to and then
+				dynamically allocates a new character array, places the c-string passed
+				to this function inside this new character array and then makes the textArray pointer
+				point to this new array.  
+		*/		
+		void editText(const char*);
+	
+	
+}; //end of Text class
 #endif
